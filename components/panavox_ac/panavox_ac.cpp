@@ -81,23 +81,28 @@ void PanavoxACComponent::control(const climate::ClimateCall& call) {
                 needs_power_on = true;
             }
         }
+        this->mode = m;
     }
 
     // Apply all other desired-state changes before triggering power-on restore
     if (call.get_target_temperature().has_value()) {
         _ac.setTargetTemp(static_cast<float>(*call.get_target_temperature()));
+        this->target_temperature = *call.get_target_temperature();
     }
 
     if (call.get_fan_mode().has_value()) {
         _ac.setFanSpeed(to_fan_speed(*call.get_fan_mode()));
+        this->fan_mode = *call.get_fan_mode();
     }
 
     if (call.get_swing_mode().has_value()) {
         _ac.setSwing(to_swing_mode(*call.get_swing_mode()));
+        this->swing_mode = *call.get_swing_mode();
     }
 
     if (call.get_preset().has_value()) {
         _ac.setPreset(to_preset(*call.get_preset()));
+        this->preset = *call.get_preset();
     }
 
     // Now apply power change — desired_state is fully updated at this point
@@ -106,19 +111,29 @@ void PanavoxACComponent::control(const climate::ClimateCall& call) {
     } else if (needs_power_on) {
         _ac.setPower(true);  // enqueueFullStateOnPowerOn() uses current desired_state
     }
+
+    // Publish optimistic state immediately so the UI reflects the change at once.
+    // on_status() will suppress publish_state() for 15s, then the AC state takes over.
+    this->publish_state();
+    _optimistic_until = millis() + 15000;
 }
 
 // ---- Status callback ----
 
 void PanavoxACComponent::on_status(const DeviceStatus& s) {
-    this->mode               = from_ac_mode(s.mode, s.power);
-    this->target_temperature = s.target_temp_c;
+    this->mode                = from_ac_mode(s.mode, s.power);
+    this->target_temperature  = s.target_temp_c;
     this->current_temperature = s.current_temp_c;
-    this->fan_mode           = from_fan_speed(s.fan_speed);
-    this->swing_mode         = from_swing(s.swing_vertical, s.swing_horizontal);
-    this->preset             = from_preset(s.preset);
+    this->fan_mode            = from_fan_speed(s.fan_speed);
+    this->swing_mode          = from_swing(s.swing_vertical, s.swing_horizontal);
+    this->preset              = from_preset(s.preset);
 
-    this->publish_state();
+    // During the optimistic window, suppress publish_state() so the UI keeps
+    // showing what the user asked for. Once the window expires the AC state
+    // takes over, reverting any change the AC did not accept.
+    if (millis() >= _optimistic_until) {
+        this->publish_state();
+    }
 
     if (_compressor_freq_sensor != nullptr) {
         _compressor_freq_sensor->publish_state(static_cast<float>(s.compressor_freq));

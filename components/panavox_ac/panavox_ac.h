@@ -76,6 +76,11 @@ private:
     sensor::Sensor* _outdoor_temp_sensor    = nullptr;
     sensor::Sensor* _humidity_sensor        = nullptr;
 
+    // Optimistic UI: publish_state() is suppressed for 15s after a control()
+    // call so the user sees immediate feedback. After the window the AC state
+    // takes over, reverting if the command was not accepted.
+    uint32_t _optimistic_until = 0;
+
     // Callbacks from PanavoxAC
     void on_status(const DeviceStatus& s);
     void on_error(AcError err);

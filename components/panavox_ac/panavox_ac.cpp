@@ -121,17 +121,16 @@ void PanavoxACComponent::control(const climate::ClimateCall& call) {
 // ---- Status callback ----
 
 void PanavoxACComponent::on_status(const DeviceStatus& s) {
-    this->mode                = from_ac_mode(s.mode, s.power);
-    this->target_temperature  = s.target_temp_c;
+    // Current temperature is always live regardless of optimistic state.
     this->current_temperature = s.current_temp_c;
-    this->fan_mode            = from_fan_speed(s.fan_speed);
-    this->swing_mode          = from_swing(s.swing_vertical, s.swing_horizontal);
-    this->preset              = from_preset(s.preset);
 
-    // During the optimistic window, suppress publish_state() so the UI keeps
-    // showing what the user asked for. Once the window expires the AC state
-    // takes over, reverting any change the AC did not accept.
     if (millis() >= _optimistic_until) {
+        // Optimistic window expired: take full AC state and publish.
+        this->mode               = from_ac_mode(s.mode, s.power);
+        this->target_temperature = s.target_temp_c;
+        this->fan_mode           = from_fan_speed(s.fan_speed);
+        this->swing_mode         = from_swing(s.swing_vertical, s.swing_horizontal);
+        this->preset             = from_preset(s.preset);
         this->publish_state();
     }
 

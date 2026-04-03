@@ -1,5 +1,7 @@
 # Panavox PSS-12 INV — ESPHome Component for Home Assistant
 
+> **Compatibility:** The Panavox PSS-12 INV uses a serial protocol compatible with the Hisense/Aircon International (F4F5) family of inverter air conditioners. This component may also work with other brands sharing the same W950 WiFi module UART interface.
+
 An ESPHome external component for controlling the **Panavox PSS-12 INV** split inverter air conditioner, exposing a full `climate` entity in Home Assistant.
 
 ## What it does

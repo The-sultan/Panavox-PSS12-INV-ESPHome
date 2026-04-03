@@ -1,4 +1,4 @@
-# Panavox PSS-12 INV ESPHome Component
+# Panavox PSS-12 INV — ESPHome Component for Home Assistant
 
 An ESPHome external component for controlling the **Panavox PSS-12 INV** split inverter air conditioner, exposing a full `climate` entity in Home Assistant.
 

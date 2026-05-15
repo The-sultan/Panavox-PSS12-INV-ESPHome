@@ -15,12 +15,12 @@ void PanavoxACComponent::setup() {
     _ac.onPolarityMismatch([]() {
         ESP_LOGW(TAG, "UART polarity mismatch detected. The AC is responding but its");
         ESP_LOGW(TAG, "response cannot be decoded with the current UART configuration.");
-        ESP_LOGW(TAG, "Fix: add 'inverted: true' to your rx_pin in the UART YAML:");
-        ESP_LOGW(TAG, "  uart:");
-        ESP_LOGW(TAG, "    rx_pin:");
-        ESP_LOGW(TAG, "      number: <your GPIO>");
-        ESP_LOGW(TAG, "      inverted: true   <-- add this");
-        ESP_LOGW(TAG, "Typically needed with inverting level shifters (2N2222, CD4049, etc).");
+        ESP_LOGW(TAG, "Fix: toggle the 'inverted' flag on your rx_pin in the UART YAML.");
+        ESP_LOGW(TAG, "  - If 'inverted: true' is set, remove it or set it to false.");
+        ESP_LOGW(TAG, "  - If 'inverted' is absent or false, add 'inverted: true'.");
+        ESP_LOGW(TAG, "The required value depends on your level shifter topology.");
+        ESP_LOGW(TAG, "Inverting shifters (2N2222, CD4049, etc.) need one value;");
+        ESP_LOGW(TAG, "non-inverting ones (CD4050, AHCT family) need the opposite.");
     });
 
     _ac.onWiringIssue([]() {

@@ -87,7 +87,9 @@ warning every 30 seconds telling you exactly what to change:
 ```
 [W][panavox_ac]: UART polarity mismatch detected. The AC is responding but its
 [W][panavox_ac]: response cannot be decoded with the current UART configuration.
-[W][panavox_ac]: Fix: add 'inverted: true' to your rx_pin in the UART YAML:
+[W][panavox_ac]: Fix: toggle the 'inverted' flag on your rx_pin in the UART YAML.
+[W][panavox_ac]:   - If 'inverted: true' is set, remove it or set it to false.
+[W][panavox_ac]:   - If 'inverted' is absent or false, add 'inverted: true'.
 ...
 ```
 

@@ -55,7 +55,7 @@ The `refresh: 0s` setting above caches whatever commit was fetched on first comp
 ```yaml
 external_components:
   - source: github://The-sultan/Panavox-PSS12-INV-ESPHome
-    ref: v0.1.0
+    ref: v1.0.0
     components: [ panavox_ac ]
 ```
 

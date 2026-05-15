@@ -48,6 +48,19 @@ climate:
 
 The `compressor_frequency`, `outdoor_temperature`, and `current_humidity` sensors are optional.
 
+### Pinning to a stable version
+
+The `refresh: 0s` setting above caches whatever commit was fetched on first compile. To pin to a specific release instead, replace it with a `ref:` pointing to a version tag:
+
+```yaml
+external_components:
+  - source: github://The-sultan/Panavox-PSS12-INV-ESPHome
+    ref: v0.1.0
+    components: [ panavox_ac ]
+```
+
+See the [Releases](https://github.com/The-sultan/Panavox-PSS12-INV-ESPHome/releases) page for available versions.
+
 ## UART Configuration
 
 The W950 connector on the AC indoor unit operates at 5V logic. A level shifter is required

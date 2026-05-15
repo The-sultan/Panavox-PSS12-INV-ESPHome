@@ -51,7 +51,7 @@ CONFIG_SCHEMA = climate.climate_schema(PanavoxACComponent).extend(
 async def to_code(config):
     cg.add_library(
         "panavox-pss12-inv-core=https://github.com/The-sultan/Panavox-PSS12-INV-Core.git",
-        None,
+        "0.2.0",
     )
 
     var = cg.new_Pvariable(config[CONF_ID])

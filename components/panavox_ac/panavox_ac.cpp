@@ -11,6 +11,23 @@ static const char* const TAG = "panavox_ac";
 void PanavoxACComponent::setup() {
     _ac.onStatusUpdate([this](const DeviceStatus& s) { on_status(s); });
     _ac.onError([this](AcError err) { on_error(err); });
+
+    _ac.onPolarityMismatch([]() {
+        ESP_LOGW(TAG, "UART polarity mismatch detected. The AC is responding but its");
+        ESP_LOGW(TAG, "response cannot be decoded with the current UART configuration.");
+        ESP_LOGW(TAG, "Fix: add 'inverted: true' to your rx_pin in the UART YAML:");
+        ESP_LOGW(TAG, "  uart:");
+        ESP_LOGW(TAG, "    rx_pin:");
+        ESP_LOGW(TAG, "      number: <your GPIO>");
+        ESP_LOGW(TAG, "      inverted: true   <-- add this");
+        ESP_LOGW(TAG, "Typically needed with inverting level shifters (2N2222, CD4049, etc).");
+    });
+
+    _ac.onWiringIssue([]() {
+        ESP_LOGW(TAG, "Received bytes from UART but no recognizable response pattern.");
+        ESP_LOGW(TAG, "Check level shifter wiring, cable connections, and AC power.");
+    });
+
     _ac.begin();
 }
 

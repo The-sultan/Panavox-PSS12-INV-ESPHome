@@ -95,6 +95,8 @@ private:
     static climate::ClimateFanMode  from_fan_speed(FanSpeed fs);
     static climate::ClimateSwingMode from_swing(bool v, bool h);
     static climate::ClimatePreset   from_preset(Preset p);
+
+    static climate::ClimateAction   derive_action(climate::ClimateMode mode, uint8_t compressor_freq);
 };
 
 } // namespace panavox

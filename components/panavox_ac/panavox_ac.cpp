@@ -46,6 +46,7 @@ climate::ClimateTraits PanavoxACComponent::traits() {
     auto traits = climate::ClimateTraits();
 
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
+    traits.set_supports_action(true);
     traits.set_visual_min_temperature(16.0f);
     traits.set_visual_max_temperature(32.0f);
     traits.set_visual_temperature_step(1.0f);
@@ -98,7 +99,10 @@ void PanavoxACComponent::control(const climate::ClimateCall& call) {
                 needs_power_on = true;
             }
         }
-        this->mode = m;
+        this->mode   = m;
+        // Optimistic action: compressor state unknown after a mode change, so assume
+        // idle for heat/cool. Corrected by on_status() once the AC reports back.
+        this->action = derive_action(m, 0);
     }
 
     // Apply all other desired-state changes before triggering power-on restore
@@ -148,6 +152,7 @@ void PanavoxACComponent::on_status(const DeviceStatus& s) {
         this->fan_mode           = from_fan_speed(s.fan_speed);
         this->swing_mode         = from_swing(s.swing_vertical, s.swing_horizontal);
         this->preset             = from_preset(s.preset);
+        this->action             = derive_action(this->mode, s.compressor_freq);
         this->publish_state();
     }
 
@@ -248,6 +253,23 @@ climate::ClimatePreset PanavoxACComponent::from_preset(Preset p) {
     case Preset::TURBO: return climate::CLIMATE_PRESET_BOOST;
     case Preset::ECO:   return climate::CLIMATE_PRESET_ECO;
     default:            return climate::CLIMATE_PRESET_NONE;
+    }
+}
+
+climate::ClimateAction PanavoxACComponent::derive_action(climate::ClimateMode mode, uint8_t compressor_freq) {
+    switch (mode) {
+    case climate::CLIMATE_MODE_OFF:
+        return climate::CLIMATE_ACTION_OFF;
+    case climate::CLIMATE_MODE_FAN_ONLY:
+        return climate::CLIMATE_ACTION_FAN;
+    case climate::CLIMATE_MODE_DRY:
+        return climate::CLIMATE_ACTION_DRYING;
+    case climate::CLIMATE_MODE_HEAT:
+        return (compressor_freq > 0) ? climate::CLIMATE_ACTION_HEATING : climate::CLIMATE_ACTION_IDLE;
+    case climate::CLIMATE_MODE_COOL:
+        return (compressor_freq > 0) ? climate::CLIMATE_ACTION_COOLING : climate::CLIMATE_ACTION_IDLE;
+    default:
+        return climate::CLIMATE_ACTION_OFF;
     }
 }
 

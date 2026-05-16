@@ -46,7 +46,7 @@ climate::ClimateTraits PanavoxACComponent::traits() {
     auto traits = climate::ClimateTraits();
 
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
-    traits.set_supports_action(true);
+    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_ACTION);
     traits.set_visual_min_temperature(16.0f);
     traits.set_visual_max_temperature(32.0f);
     traits.set_visual_temperature_step(1.0f);
